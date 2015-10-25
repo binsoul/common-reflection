@@ -1,0 +1,45 @@
+{
+    "name": "binsoul/reflection",
+    "description": "Reflection related classes including dependency injection",
+    "keywords": [
+        "http",
+        "dispatcher"
+    ],
+    "homepage": "https://github.com/binsoul/reflection",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sebastian Mößler",
+            "email": "code@binsoul.de",
+            "homepage": "https://github.com/binsoul",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.0",
+        "fabpot/php-cs-fixer": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "BinSoul\\Reflection\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BinSoul\\Reflection\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "fix-src": "php-cs-fixer fix -v src",
+        "fix-tests": "php-cs-fixer fix -v tests"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}
