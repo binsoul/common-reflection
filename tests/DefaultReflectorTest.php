@@ -55,7 +55,7 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
     {
         $reflector = new DefaultReflector();
 
-        $parameters = $reflector->resolveParameters(ClassA::class, '__construct', []);
+        $parameters = $reflector->resolveMethodParameters(ClassA::class, '__construct', []);
         $this->assertEquals(1, count($parameters));
         $this->assertTrue($parameters[0]->isAvailable);
         $this->assertTrue($parameters[0]->isOptional);
@@ -67,7 +67,7 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
     {
         $reflector = new DefaultReflector();
 
-        $parameters = $reflector->resolveParameters(ClassA::class, '__construct', ['optional' => 'provided']);
+        $parameters = $reflector->resolveMethodParameters(ClassA::class, '__construct', ['optional' => 'provided']);
         $this->assertEquals(1, count($parameters));
         $this->assertTrue($parameters[0]->isAvailable);
         $this->assertTrue($parameters[0]->isOptional);
@@ -79,7 +79,7 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
     {
         $reflector = new DefaultReflector();
 
-        $parameters = $reflector->resolveParameters(ClassA::class, '__construct', ['provided']);
+        $parameters = $reflector->resolveMethodParameters(ClassA::class, '__construct', ['provided']);
         $this->assertEquals(1, count($parameters));
         $this->assertTrue($parameters[0]->isAvailable);
         $this->assertTrue($parameters[0]->isOptional);
@@ -91,7 +91,7 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
     {
         $reflector = new DefaultReflector();
 
-        $parameters = $reflector->resolveParameters(ClassB::class, '__construct', []);
+        $parameters = $reflector->resolveMethodParameters(ClassB::class, '__construct', []);
         $this->assertEquals(1, count($parameters));
         $this->assertFalse($parameters[0]->isAvailable);
         $this->assertFalse($parameters[0]->isOptional);
@@ -103,7 +103,7 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
     {
         $reflector = new DefaultReflector();
 
-        $parameters = $reflector->resolveParameters(ClassC::class, '__construct', []);
+        $parameters = $reflector->resolveMethodParameters(ClassC::class, '__construct', []);
         $this->assertEquals(3, count($parameters));
         $this->assertFalse($parameters[0]->isAvailable);
         $this->assertFalse($parameters[0]->isOptional);
@@ -125,12 +125,38 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
     {
         $reflector = new DefaultReflector();
 
-        $parameters = $reflector->resolveParameters(ClassD::class, '__construct', []);
+        $parameters = $reflector->resolveMethodParameters(ClassD::class, '__construct', []);
         $this->assertEquals(2, count($parameters));
         $this->assertFalse($parameters[1]->isAvailable);
         $this->assertFalse($parameters[1]->isOptional);
         $this->assertEquals('required', $parameters[1]->name);
         $this->assertEquals(null, $parameters[1]->value);
+    }
+
+    public function test_resolves_function_parameters()
+    {
+        $reflector = new DefaultReflector();
+        $function = function (ClassC $c, $required, $optional = 'optional') {
+
+        };
+
+        $parameters = $reflector->resolveFunctionParameters($function, []);
+        $this->assertEquals(3, count($parameters));
+
+        $this->assertFalse($parameters[0]->isAvailable);
+        $this->assertFalse($parameters[0]->isOptional);
+        $this->assertEquals('c', $parameters[0]->name);
+        $this->assertEquals(ClassC::class, $parameters[0]->value);
+
+        $this->assertFalse($parameters[1]->isAvailable);
+        $this->assertFalse($parameters[1]->isOptional);
+        $this->assertEquals('required', $parameters[1]->name);
+        $this->assertEquals(null, $parameters[1]->value);
+
+        $this->assertTrue($parameters[2]->isAvailable);
+        $this->assertTrue($parameters[2]->isOptional);
+        $this->assertEquals('optional', $parameters[2]->name);
+        $this->assertEquals('optional', $parameters[2]->value);
     }
 
     public function test_counts_reflection()
@@ -146,7 +172,7 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(3, $reflector->getReflectionCount());
         $reflector->getInterfaces(ClassA::class);
         $this->assertEquals(4, $reflector->getReflectionCount());
-        $reflector->resolveParameters(ClassA::class, '__construct', []);
+        $reflector->resolveMethodParameters(ClassA::class, '__construct', []);
         $this->assertEquals(5, $reflector->getReflectionCount());
     }
 
@@ -165,6 +191,15 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
     public function test_throws_exception_for_invalid_method()
     {
         $reflector = new DefaultReflector();
-        $reflector->resolveParameters(ClassA::class, 'foobar', []);
+        $reflector->resolveMethodParameters(ClassA::class, 'foobar', []);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function test_throws_exception_for_invalid_function()
+    {
+        $reflector = new DefaultReflector();
+        $reflector->resolveFunctionParameters('foobar', []);
     }
 }

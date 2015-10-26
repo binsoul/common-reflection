@@ -141,7 +141,7 @@ class DefaultDependencyInjector implements DependencyInjector
         $this->processing[$type] = true;
 
         $parameters = [];
-        foreach ($this->reflector->resolveParameters($type, '__construct', $arguments) as $parameter) {
+        foreach ($this->reflector->resolveMethodParameters($type, '__construct', $arguments) as $parameter) {
             $name = $parameter->name;
             $value = $parameter->value;
 

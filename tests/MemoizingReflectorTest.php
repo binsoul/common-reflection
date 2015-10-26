@@ -19,7 +19,7 @@ class MemoizingReflectorTest extends \PHPUnit_Framework_TestCase
     {
         $reflector = new MemoizingReflector();
         $this->assertTrue($reflector->isInstantiable(ClassA::class));
-        $this->assertEquals(1, count($reflector->resolveParameters(ClassA::class, '__construct', [])));
+        $this->assertEquals(1, count($reflector->resolveMethodParameters(ClassA::class, '__construct', [])));
         $reflector->setData([ClassA::class => ['isInstantiable' => false]]);
         $this->assertFalse($reflector->isInstantiable(ClassA::class));
     }
@@ -37,8 +37,8 @@ class MemoizingReflectorTest extends \PHPUnit_Framework_TestCase
         $reflector = new MemoizingReflector();
         $this->assertTrue($reflector->isInstantiable(ClassA::class));
         $this->assertTrue($reflector->isInstantiable(ClassA::class));
-        $this->assertEquals(1, count($reflector->resolveParameters(ClassA::class, '__construct', [])));
-        $this->assertEquals(1, count($reflector->resolveParameters(ClassA::class, '__construct', [])));
+        $this->assertEquals(1, count($reflector->resolveMethodParameters(ClassA::class, '__construct', [])));
+        $this->assertEquals(1, count($reflector->resolveMethodParameters(ClassA::class, '__construct', [])));
     }
 
     public function test_works_with_objects()
@@ -47,6 +47,6 @@ class MemoizingReflectorTest extends \PHPUnit_Framework_TestCase
 
         $reflector = new MemoizingReflector();
         $this->assertTrue($reflector->isInstantiable($object));
-        $this->assertEquals(1, count($reflector->resolveParameters($object, '__construct', [])));
+        $this->assertEquals(1, count($reflector->resolveMethodParameters($object, '__construct', [])));
     }
 }

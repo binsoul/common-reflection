@@ -44,19 +44,30 @@ class DefaultReflector implements Reflector
         return $this->reflectType($type)['interfaces'];
     }
 
+    public function resolveMethodParameters($type, $method, array $arguments)
+    {
+        $data = $this->reflectMethod($type, $method);
+
+        return $this->resolveParameters($data['parameters'], $arguments);
+    }
+
+    public function resolveFunctionParameters($function, array $arguments)
+    {
+        $data = $this->reflectFunction($function);
+
+        return $this->resolveParameters($data['parameters'], $arguments);
+    }
+
     /**
      * Builds an array of resolved parameters.
      *
-     * @param string  $type
-     * @param string  $method
+     * @param mixed[] $parameters
      * @param mixed[] $arguments
      *
      * @return ResolvedParameter[]
      */
-    public function resolveParameters($type, $method, array $arguments)
+    protected function resolveParameters($parameters, array $arguments)
     {
-        $data = $this->reflectMethod($type, $method);
-        $parameters = $data['parameters'];
         $hasArguments = count($arguments) > 0;
 
         $result = [];
@@ -99,6 +110,8 @@ class DefaultReflector implements Reflector
     }
 
     /**
+     * Returns an array of reflection data for the given type.
+     *
      * @param string|object $type
      *
      * @return mixed[]
@@ -137,6 +150,8 @@ class DefaultReflector implements Reflector
     }
 
     /**
+     * Returns an array of reflection data for the given method of the given type.
+     *
      * @param string|object $type
      * @param string        $method
      *
@@ -144,20 +159,49 @@ class DefaultReflector implements Reflector
      */
     protected function reflectMethod($type, $method)
     {
-        $reflection = $this->buildReflectionClass($type);
+        $reflectionClass = $this->buildReflectionClass($type);
 
-        if (!$reflection->hasMethod($method)) {
+        if (!$reflectionClass->hasMethod($method)) {
             throw new \InvalidArgumentException(sprintf('The type "%s" has no method "%s".', $type, $method));
         }
 
-        $methodReflection = $reflection->getMethod($method);
-        $data = [
-            'isInvokable' => !$methodReflection->isAbstract() && !$methodReflection->isDestructor(),
-            'isPublic' => $methodReflection->isPublic(),
-            'parameters' => [],
-        ];
+        $reflection = $reflectionClass->getMethod($method);
 
-        foreach ($methodReflection->getParameters() as $index => $parameter) {
+        return [
+            'isInvokable' => !$reflection->isAbstract() && !$reflection->isDestructor(),
+            'isPublic' => $reflection->isPublic(),
+            'parameters' => $this->reflectParameters($reflection->getParameters()),
+        ];
+    }
+
+    /**
+     * Returns an array of reflection data for the given function.
+     *
+     * @param string|\Closure $function
+     *
+     * @return mixed[]
+     */
+    protected function reflectFunction($function)
+    {
+        $reflection = $this->buildReflectionFunction($function);
+
+        return [
+            'isClosure' => $reflection->isClosure(),
+            'parameters' => $this->reflectParameters($reflection->getParameters()),
+        ];
+    }
+
+    /**
+     * Returns an array of reflection data for the given parameters.
+     *
+     * @param \ReflectionParameter[] $parameters
+     *
+     * @return mixed[]
+     */
+    protected function reflectParameters(array $parameters)
+    {
+        $result = [];
+        foreach ($parameters as $parameter) {
             $param = [
                 'isSimple' => true,
                 'isOptional' => $parameter->isOptional(),
@@ -174,10 +218,10 @@ class DefaultReflector implements Reflector
                 $param['default'] = $parameter->getDefaultValue();
             }
 
-            $data['parameters'][] = $param;
+            $result[] = $param;
         }
 
-        return $data;
+        return $result;
     }
 
     /**
@@ -195,6 +239,22 @@ class DefaultReflector implements Reflector
             return new \ReflectionClass($type);
         } catch (\ReflectionException $e) {
             throw new \InvalidArgumentException(sprintf('The type "%s" does not exist.', $type), 0, $e);
+        }
+    }
+
+    /**
+     * Builds a reflection class for the given function.
+     *
+     * @param string $function
+     *
+     * @return \ReflectionFunction
+     */
+    private function buildReflectionFunction($function)
+    {
+        try {
+            return new \ReflectionFunction($function);
+        } catch (\ReflectionException $e) {
+            throw new \InvalidArgumentException(sprintf('The function "%s" does not exist.', $function), 0, $e);
         }
     }
 }

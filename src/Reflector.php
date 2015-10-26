@@ -42,7 +42,7 @@ interface Reflector
     public function getInterfaces($type);
 
     /**
-     * Builds an array of resolved parameters using the provided arguments.
+     * Builds an array of resolved parameters for the given method of the given type.
      *
      * @param string  $type
      * @param string  $method
@@ -50,5 +50,15 @@ interface Reflector
      *
      * @return ResolvedParameter[]
      */
-    public function resolveParameters($type, $method, array $arguments);
+    public function resolveMethodParameters($type, $method, array $arguments);
+
+    /**
+     * Builds an array of resolved parameters for the function.
+     *
+     * @param string|\Closure $function
+     * @param mixed[]         $arguments
+     *
+     * @return ResolvedParameter[]
+     */
+    public function resolveFunctionParameters($function, array $arguments);
 }
