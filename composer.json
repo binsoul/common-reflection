@@ -2,8 +2,7 @@
     "name": "binsoul/reflection",
     "description": "Reflection related classes including dependency injection",
     "keywords": [
-        "http",
-        "dispatcher"
+        "reflection"
     ],
     "homepage": "https://github.com/binsoul/reflection",
     "license": "MIT",
@@ -34,8 +33,10 @@
     },
     "scripts": {
         "test": "phpunit",
-        "fix-src": "php-cs-fixer fix -v src",
-        "fix-tests": "php-cs-fixer fix -v tests"
+        "fix-style": [
+            "php-cs-fixer fix src",
+            "php-cs-fixer fix tests"
+        ]
     },
     "extra": {
         "branch-alias": {
