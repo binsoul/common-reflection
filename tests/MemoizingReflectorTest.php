@@ -1,8 +1,8 @@
 <?php
 
-namespace BinSoul\Test\Reflection;
+namespace BinSoul\Test\Common\Reflection;
 
-use BinSoul\Reflection\MemoizingReflector;
+use BinSoul\Common\Reflection\MemoizingReflector;
 
 require_once 'Model.php';
 

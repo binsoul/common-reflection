@@ -1,6 +1,6 @@
 <?php
 
-namespace BinSoul\Test\Reflection;
+namespace BinSoul\Test\Common\Reflection;
 
 trait FooTrait
 {

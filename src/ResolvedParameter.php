@@ -1,6 +1,6 @@
 <?php
 
-namespace BinSoul\Reflection;
+namespace BinSoul\Common\Reflection;
 
 /**
  * Represents an resolved parameter.

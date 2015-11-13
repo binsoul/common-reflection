@@ -1,6 +1,6 @@
 <?php
 
-namespace BinSoul\Reflection;
+namespace BinSoul\Common\Reflection;
 
 /**
  * Stores reflection data in an internal array which can be retrieved.

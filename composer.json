@@ -1,10 +1,10 @@
 {
-    "name": "binsoul/reflection",
+    "name": "binsoul/common-reflection",
     "description": "Reflection related classes including dependency injection",
     "keywords": [
         "reflection"
     ],
-    "homepage": "https://github.com/binsoul/reflection",
+    "homepage": "https://github.com/binsoul/common-reflection",
     "license": "MIT",
     "authors": [
         {
@@ -23,12 +23,12 @@
     },
     "autoload": {
         "psr-4": {
-            "BinSoul\\Reflection\\": "src"
+            "BinSoul\\Common\\Reflection\\": "src"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "BinSoul\\Reflection\\": "tests"
+            "BinSoul\\Common\\Reflection\\": "tests"
         }
     },
     "scripts": {

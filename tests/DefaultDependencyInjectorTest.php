@@ -1,9 +1,9 @@
 <?php
 
-namespace BinSoul\Test\Reflection;
+namespace BinSoul\Test\Common\Reflection;
 
-use BinSoul\Reflection\DefaultDependencyInjector;
-use BinSoul\Reflection\DefaultReflector;
+use BinSoul\Common\Reflection\DefaultDependencyInjector;
+use BinSoul\Common\Reflection\DefaultReflector;
 
 require_once 'Model.php';
 

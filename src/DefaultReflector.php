@@ -1,7 +1,10 @@
 <?php
 
-namespace BinSoul\Reflection;
+namespace BinSoul\Common\Reflection;
 
+/**
+ * Provides a default implementation of the {@see Reflector} interface.
+ */
 class DefaultReflector implements Reflector
 {
     /** Type is a class */

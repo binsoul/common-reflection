@@ -1,6 +1,6 @@
 <?php
 
-namespace BinSoul\Reflection;
+namespace BinSoul\Common\Reflection;
 
 /**
  * Instantiates objects and provides their dependencies.

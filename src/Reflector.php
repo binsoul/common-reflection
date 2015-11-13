@@ -1,6 +1,6 @@
 <?php
 
-namespace BinSoul\Reflection;
+namespace BinSoul\Common\Reflection;
 
 /**
  * Provides methods to introspect classes, interfaces and traits.
