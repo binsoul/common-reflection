@@ -49,7 +49,11 @@ class DefaultReflector implements Reflector
 
     public function resolveMethodParameters($type, $method, array $arguments)
     {
-        $data = $this->reflectMethod($type, $method);
+        if ($method == '__construct') {
+            $data = $this->reflectConstructor($type);
+        } else {
+            $data = $this->reflectMethod($type, $method);
+        }
 
         return $this->resolveParameters($data['parameters'], $arguments);
     }
@@ -133,10 +137,8 @@ class DefaultReflector implements Reflector
 
         if ($reflection->isInterface()) {
             $data['type'] = self::TYPE_INTERFACE;
-        } else {
-            if ($reflection->isTrait()) {
-                $data['type'] = self::TYPE_TRAIT;
-            }
+        } elseif ($reflection->isTrait()) {
+            $data['type'] = self::TYPE_TRAIT;
         }
 
         $parents = class_parents($type, true);
@@ -150,6 +152,33 @@ class DefaultReflector implements Reflector
         }
 
         return $data;
+    }
+
+    /**
+     * Returns an array of reflection data for the constructor of the given type.
+     *
+     * @param string|object $type
+     *
+     * @return mixed[]
+     */
+    protected function reflectConstructor($type)
+    {
+        $reflectionClass = $this->buildReflectionClass($type);
+
+        $reflection = $reflectionClass->getConstructor();
+        if ($reflection === null) {
+            return [
+                'isInvokable' => $reflectionClass->isInstantiable(),
+                'isPublic' => true,
+                'parameters' => [],
+            ];
+        }
+
+        return [
+            'isInvokable' => $reflectionClass->isInstantiable(),
+            'isPublic' => $reflection->isPublic(),
+            'parameters' => $this->reflectParameters($reflection->getParameters()),
+        ];
     }
 
     /**

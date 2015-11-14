@@ -71,6 +71,13 @@ class ClassC
         $this->b = $b;
         $this->d = $d;
     }
+
+    public function set(FooInterface $i, ClassB $b, ClassD $d = null)
+    {
+        $this->i = $i;
+        $this->b = $b;
+        $this->d = $d;
+    }
 }
 
 class ClassD

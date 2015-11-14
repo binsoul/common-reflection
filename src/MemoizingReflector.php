@@ -59,7 +59,17 @@ class MemoizingReflector extends DefaultReflector
         return $data;
     }
 
+    protected function reflectConstructor($type)
+    {
+        return $this->memoizeReflectMethod($type, '__construct');
+    }
+
     protected function reflectMethod($type, $method)
+    {
+        return $this->memoizeReflectMethod($type, $method);
+    }
+
+    protected function memoizeReflectMethod($type, $method)
     {
         $key = $type;
         if (is_object($type)) {
@@ -71,7 +81,11 @@ class MemoizingReflector extends DefaultReflector
         }
 
         $this->reflectType($type);
-        $data = parent::reflectMethod($type, $method);
+        if ($method == '__construct') {
+            $data = parent::reflectConstructor($type);
+        } else {
+            $data = parent::reflectMethod($type, $method);
+        }
 
         if (!isset($this->data[$key]['methods'])) {
             $this->data[$key]['methods'] = [];

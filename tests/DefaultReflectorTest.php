@@ -51,6 +51,14 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([BarInterface::class], $reflector->getInterfaces(BazInterface::class));
     }
 
+    public function test_resolves_missing_constructor()
+    {
+        $reflector = new DefaultReflector();
+
+        $parameters = $reflector->resolveMethodParameters(\stdClass::class, '__construct', []);
+        $this->assertEquals(0, count($parameters));
+    }
+
     public function test_resolves_optional_parameters()
     {
         $reflector = new DefaultReflector();
@@ -103,7 +111,7 @@ class DefaultReflectorTest extends \PHPUnit_Framework_TestCase
     {
         $reflector = new DefaultReflector();
 
-        $parameters = $reflector->resolveMethodParameters(ClassC::class, '__construct', []);
+        $parameters = $reflector->resolveMethodParameters(ClassC::class, 'set', []);
         $this->assertEquals(3, count($parameters));
         $this->assertFalse($parameters[0]->isAvailable);
         $this->assertFalse($parameters[0]->isOptional);
