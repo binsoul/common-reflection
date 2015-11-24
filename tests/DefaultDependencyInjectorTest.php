@@ -48,6 +48,9 @@ class DefaultDependencyInjectorTest extends \PHPUnit_Framework_TestCase
         $injector = new DefaultDependencyInjector(new DefaultReflector());
 
         $injector->registerImplementation(FooInterface::class, ClassA::class);
+        $a = $injector->newInstance(FooInterface::class);
+        $this->assertInstanceOf(ClassA::class, $a);
+
         $c = $injector->newInstance(ClassC::class);
         $this->assertInstanceOf(ClassA::class, $c->i);
     }

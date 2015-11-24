@@ -116,19 +116,24 @@ class DefaultDependencyInjector implements DependencyInjector
      */
     private function buildInstance($type, array $arguments = [], $isSingleton = true)
     {
-        $key = $this->buildKey($type, $arguments);
-        if ($isSingleton && isset($this->objects[$key])) {
-            return $this->objects[$type];
+        $class = $type;
+        if (isset($this->interfaces[$class])) {
+            $class = $this->interfaces[$class];
         }
 
-        if (isset($this->processing[$type])) {
+        $key = $this->buildKey($class, $arguments);
+        if ($isSingleton && isset($this->objects[$key])) {
+            return $this->objects[$class];
+        }
+
+        if (isset($this->processing[$class])) {
             return;
         }
 
-        $this->processing[$type] = true;
+        $this->processing[$class] = true;
 
-        if (isset($this->factories[$type])) {
-            $factory = $this->factories[$type];
+        if (isset($this->factories[$class])) {
+            $factory = $this->factories[$class];
             $parameters = $this->resolveObjects(
                 $this->reflector->resolveFunctionParameters($factory, $arguments),
                 'Closure'
@@ -136,23 +141,23 @@ class DefaultDependencyInjector implements DependencyInjector
 
             $result = $factory(...$parameters);
         } else {
-            if (!$this->reflector->isInstantiable($type)) {
-                throw new \RuntimeException(sprintf('"%s" is not instantiable.', $type));
+            if (!$this->reflector->isInstantiable($class)) {
+                throw new \RuntimeException(sprintf('"%s" is not instantiable.', $class));
             }
 
             $parameters = $this->resolveObjects(
-                $this->reflector->resolveMethodParameters($type, '__construct', $arguments),
-                $type
+                $this->reflector->resolveMethodParameters($class, '__construct', $arguments),
+                $class
             );
 
-            $result = new $type(...$parameters);
+            $result = new $class(...$parameters);
         }
 
         if ($isSingleton) {
             $this->registerInstance($key, $result);
         }
 
-        unset($this->processing[$type]);
+        unset($this->processing[$class]);
 
         return $result;
     }
