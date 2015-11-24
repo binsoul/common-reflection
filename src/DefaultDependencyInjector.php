@@ -121,84 +121,33 @@ class DefaultDependencyInjector implements DependencyInjector
             return $this->objects[$type];
         }
 
-        if (isset($this->factories[$type])) {
-            $result = $this->factories[$type]($arguments);
-            if ($isSingleton) {
-                $this->registerInstance($key, $result);
-            }
-
-            return $result;
-        }
-
-        if (!$this->reflector->isInstantiable($type)) {
-            throw new \RuntimeException(sprintf('"%s" is not instantiable.', $type));
-        }
-
         if (isset($this->processing[$type])) {
             return;
         }
 
         $this->processing[$type] = true;
 
-        $parameters = [];
-        foreach ($this->reflector->resolveMethodParameters($type, '__construct', $arguments) as $parameter) {
-            $name = $parameter->name;
-            $value = $parameter->value;
+        if (isset($this->factories[$type])) {
+            $factory = $this->factories[$type];
+            $parameters = $this->resolveObjects(
+                $this->reflector->resolveFunctionParameters($factory, $arguments),
+                'Closure'
+            );
 
-            if ($parameter->isAvailable) {
-                $parameters[] = $value;
-
-                continue;
+            $result = $factory(...$parameters);
+        } else {
+            if (!$this->reflector->isInstantiable($type)) {
+                throw new \RuntimeException(sprintf('"%s" is not instantiable.', $type));
             }
 
-            if ($parameter->type == ResolvedParameter::TYPE_SIMPLE) {
-                throw new \RuntimeException(
-                    sprintf(
-                        'Constructor parameter "%s" of type "%s" has no default value.',
-                        $name,
-                        $type
-                    )
-                );
-            }
+            $parameters = $this->resolveObjects(
+                $this->reflector->resolveMethodParameters($type, '__construct', $arguments),
+                $type
+            );
 
-            $class = $value;
-            if (isset($this->interfaces[$value])) {
-                $class = $this->interfaces[$value];
-            }
-
-            $parameterKey = $this->buildKey($class);
-            if (isset($this->objects[$parameterKey])) {
-                $parameters[] = $this->objects[$parameterKey];
-
-                continue;
-            }
-
-            try {
-                $previousException = null;
-                $instance = $this->buildInstance($class);
-            } catch (\RuntimeException $e) {
-                $previousException = $e;
-                $instance = null;
-            }
-
-            if ($instance === null && !$parameter->isOptional) {
-                if ($previousException !== null) {
-                    throw $previousException;
-                }
-
-                throw new \RuntimeException(
-                    sprintf(
-                        'Circular dependency detected for constructor parameter "%s" of type "%s".',
-                        $name,
-                        $type
-                    )
-                );
-            }
-
-            $parameters[] = $instance;
+            $result = new $type(...$parameters);
         }
 
-        $result = new $type(...$parameters);
         if ($isSingleton) {
             $this->registerInstance($key, $result);
         }
@@ -221,6 +170,77 @@ class DefaultDependencyInjector implements DependencyInjector
         $result = $type;
         if (count($arguments) > 0) {
             $result .= '_'.md5(serialize($arguments));
+        }
+
+        return $result;
+    }
+
+    /**
+     * Resolves missing object parameters.
+     *
+     * @param ResolvedParameter[] $parameters
+     * @param string              $type
+     *
+     * @return mixed[]
+     */
+    private function resolveObjects(array $parameters, $type)
+    {
+        $result = [];
+        foreach ($parameters as $parameter) {
+            $name = $parameter->name;
+            $value = $parameter->value;
+
+            if ($parameter->isAvailable) {
+                $result[] = $value;
+
+                continue;
+            }
+
+            if ($parameter->type == ResolvedParameter::TYPE_SIMPLE) {
+                throw new \RuntimeException(
+                    sprintf(
+                        'Parameter "%s" of type "%s" has no default value.',
+                        $name,
+                        $type
+                    )
+                );
+            }
+
+            $class = $value;
+            if (isset($this->interfaces[$value])) {
+                $class = $this->interfaces[$value];
+            }
+
+            $parameterKey = $this->buildKey($class);
+            if (isset($this->objects[$parameterKey])) {
+                $result[] = $this->objects[$parameterKey];
+
+                continue;
+            }
+
+            try {
+                $previousException = null;
+                $instance = $this->buildInstance($class);
+            } catch (\RuntimeException $e) {
+                $previousException = $e;
+                $instance = null;
+            }
+
+            if ($instance === null && !$parameter->isOptional) {
+                if ($previousException !== null) {
+                    throw $previousException;
+                }
+
+                throw new \RuntimeException(
+                    sprintf(
+                        'Circular dependency detected for parameter "%s" of type "%s".',
+                        $name,
+                        $type
+                    )
+                );
+            }
+
+            $result[] = $instance;
         }
 
         return $result;

@@ -75,6 +75,17 @@ class DefaultDependencyInjectorTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(ClassA::class, $c->i);
     }
 
+    public function test_injects_dependencies_into_factories()
+    {
+        $injector = new DefaultDependencyInjector(new DefaultReflector());
+        $injector->registerFactory(BazInterface::class, function (ClassA $a) {
+            return new ClassB($a);
+        });
+
+        $b = $injector->newInstance(BazInterface::class);
+        $this->assertInstanceOf(ClassA::class, $b->a);
+    }
+
     public function test_returns_singletons()
     {
         $injector = new DefaultDependencyInjector(new DefaultReflector());
